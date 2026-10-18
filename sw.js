@@ -1,4 +1,4 @@
-var V="tripsync-v1",FILES=["./","./index.html","./manifest.json","./icon-192.png","./icon-512.png","./apple-touch-icon.png"];
+var V="tripsync-v2",FILES=["./","./index.html","./manifest.json","./config.js","./firebase-app-compat.js","./firebase-firestore-compat.js","./icon-192.png","./icon-512.png","./apple-touch-icon.png"];
 self.addEventListener("install",function(e){e.waitUntil(caches.open(V).then(function(c){return c.addAll(FILES)}));self.skipWaiting()});
 self.addEventListener("activate",function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(x){return x!==V}).map(function(x){return caches.delete(x)}))}));self.clients.claim()});
 self.addEventListener("fetch",function(e){if(e.request.method!=="GET")return;

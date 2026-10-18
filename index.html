@@ -2,6 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.json"><meta name="theme-color" content="#2f7d6d"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="旅伴記">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Huninn&display=swap" rel="stylesheet">
+<script src="config.js"></script>
 <title>旅伴記</title>
 <style>
 :root{--bg:#f4faf8;--card:#fff;--tx:#1f2a27;--mu:#6b7d77;--ac:#2f7d6d;--ac2:#dff1ec;--ok:#1f9d55;--no:#d93636;--bd:#d4e6e0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -44,8 +45,14 @@ input,select,textarea{border-radius:14px}.set{border-radius:14px}
 #tp{position:fixed;right:14px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:35;width:min(390px,calc(100% - 28px));max-height:min(64vh,560px);overflow:auto;background:var(--card);border:1px solid var(--bd);border-radius:22px;box-shadow:0 10px 34px rgba(0,0,0,.28);padding:10px 14px 14px;display:none}#tp.on{display:block}
 #tph{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-10px;background:var(--card);padding:6px 0;z-index:2}#tpx{border:0;background:var(--ac2);color:var(--tx);border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer}
 #tools .card{display:none;border:0;box-shadow:none;padding:0;margin:0}#tools .card.on{display:block}#tools .card>h3:first-child{margin-top:2px}
+
+.dg{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;font-size:1.3rem;color:var(--mu);padding:0 6px 0 0;align-self:center}
+.row.dragging{opacity:.45;background:var(--ac2)}.row.over{box-shadow:0 -3px 0 var(--ac)}.row.overend{box-shadow:0 3px 0 var(--ac)}
+#toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:88%;background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:14px;z-index:60;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s}#toast.on{opacity:1}
+.jg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}.jp{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:var(--ac2);cursor:pointer}
+#plb{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:12px}#plb.on{display:flex}#plb img{max-width:100%;max-height:78vh;border-radius:10px}#plb button{border:0;border-radius:999px;padding:10px 18px;font:inherit;background:#fff;color:#222;cursor:pointer;margin:0 4px}#plb .dl{background:var(--no);color:#fff}
 </style></head><body>
-<header><h1 id="tn">旅伴記</h1><select id="tsel"></select><button class="hb" id="tnew">＋</button><div id="st"></div></header>
+<header><h1 id="tn">旅伴記</h1><select id="tsel"></select><button class="hb" id="tnew" aria-label="旅行清單">🏠</button><div id="st"></div></header>
 <nav id="nav"></nav>
 <main>
 <section id="s0"><div class="card" id="wishcard"><h3>💡 備案清單 <span id="wiCnt" class="mu"></span></h3><p class="mu" style="margin:0 0 6px">想去但還沒排進行程的地方,先放這裡,決定後一鍵排進某一天。</p><div id="wiList"></div>
@@ -61,6 +68,7 @@ input,select,textarea{border-radius:14px}.set{border-radius:14px}
 <label>新增項目</label><input id="ckt" type="text" placeholder="例如 帶轉接頭"><div class="chips" id="ckc"></div><button class="btn" id="ckadd">＋ 加入清單</button></div></section>
 <section id="s3"><div class="card"><h3>📝 新增備忘</h3><label>標題(選填)</label><input id="mt" type="text"><label>內容</label><textarea id="mb" rows="3" placeholder="地址、訂位資料、想記的事…"></textarea><button class="btn" id="madd">＋ 新增</button></div><div id="mlist"></div></section>
 
+<section id="s6"><div class="card"><h3>📖 寫遊記</h3><label>日期</label><select id="jd"></select><label>標題</label><input id="jt" placeholder="例如 太宰府的梅枝餅"><label>內容</label><textarea id="jb" rows="4" placeholder="今天發生了什麼、有什麼感想…"></textarea><label>照片(可複選)</label><input id="jf" type="file" accept="image/*" multiple><div class="mu" id="jfc"></div><button class="btn" id="jadd">儲存遊記</button><div class="mu" style="margin-top:6px">📱 遊記只存在這支手機,不會同步給旅伴。照片會自動壓縮(最長邊約 1400 像素)。清除瀏覽器資料會讓遊記消失,請定期匯出。</div></div><button class="btn" id="jex" style="margin:0 0 12px">📄 匯出遊記成 HTML 檔</button><div id="jlist"></div><input type="file" id="jf2" accept="image/*" multiple style="display:none"></section>
 <section id="s4"><div id="set"></div></section>
 </main>
 <button id="tfab" aria-label="旅行小工具">🧰</button>
@@ -75,6 +83,7 @@ input,select,textarea{border-radius:14px}.set{border-radius:14px}
 <div class="mu" style="margin-top:8px">10/31 以前購買:在免稅店出示護照,現場直接付免稅價(部分百貨先付含稅價再到櫃台退)。11/1 起改制:先付含稅價,離境時經海關確認後才退款,同一張收據的商品都要帶出境。實際金額以收據與店家說明為準。</div></div>
 <div class="card"><h3>💵 小費計算</h3><label>帳單金額</label><input id="tbA" type="number" inputmode="decimal" step="any"><label>貨幣</label><select id="tbC"></select><label>小費 %</label><input id="tbP" type="number" step="any" value="15"><div class="chips" id="tbQ"></div><label>人數(平分)</label><input id="tbN" type="number" value="1" min="1"><label class="ck" style="margin-top:8px"><input type="checkbox" id="tbRd">總額進位成整數</label><div id="tbR" class="set" style="display:none"></div><div class="mu" style="margin-top:8px">日本、韓國、台灣一般不需要給小費。美國多半 15–20%,歐洲常已含服務費,可再給 5–10%,請以帳單為準。</div></div>
 <div class="card"><h3>📈 匯率表</h3><p class="mu" style="margin:0" id="rfs"></p><button class="btn" id="rfx">更新即時匯率</button><div id="rfm" class="mu"></div><details style="margin-top:8px"><summary>手動修改匯率(1 單位 = ? 台幣)</summary><div id="rft"></div></details><button class="btn s" id="rap">套用到這趟旅行的匯率</button></div></div></div>
+<div id="toast"></div><div id="plb"><img id="plbi" alt="照片"><div><button id="plbd" class="dl">刪除照片</button><button id="plbx">關閉</button></div></div>
 <div id="wl"><div id="wlb"></div></div>
 <script>
 var $=function(i){return document.getElementById(i)};
@@ -83,7 +92,7 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 function ld(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
 function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function arm(b,t,fn){if(b.getAttribute("data-arm")){fn();return}var o=b.textContent;b.setAttribute("data-arm","1");b.textContent=t;setTimeout(function(){if(b.isConnected){b.removeAttribute("data-arm");b.textContent=o}},2500)}
-var CFG=ld("tt_fb",null),TR=ld("tt_trips",[]),CUR=ld("tt_cur",null),T=null,cloud=false,fdb=null,unsub=null,DEL={},wl=false,tab=0;
+var BUILTIN=window.TT_CONFIG||null,sdk="none",lastErr="",CFG=ld("tt_fb",null)||BUILTIN,TR=ld("tt_trips",[]),CUR=ld("tt_cur",null),T=null,cloud=false,fdb=null,unsub=null,DEL={},wl=false,tab=0;
 var TH={sakura:["🌸","櫻花粉","#d9728f"],matcha:["🍵","抹茶綠","#6b9457"],sea:["🌊","海鹽藍","#4a91b8"],milktea:["🧋","奶茶棕","#a67a52"],lavender:["🪻","薰衣草","#8a72b8"],peach:["🍑","蜜桃橘","#e8834f"]},THK=Object.keys(TH),wth=THK[Math.floor(Math.random()*THK.length)],curK="sakura";
 function hx(h){return [1,3,5].map(function(i){return parseInt(h.substr(i,2),16)})}
 function mix(a,b,t){var x=hx(a),y=hx(b);return "#"+x.map(function(v,i){return ("0"+Math.round(v*t+y[i]*(1-t)).toString(16)).slice(-2)}).join("")}
@@ -96,7 +105,7 @@ function swch(el,cur,fn){el.innerHTML=THK.map(function(k){return '<button type="
 try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",function(){applyTheme(curK)})}catch(e){}
 var DCATS=["🍜 餐飲","🚃 交通","🛍️ 購物","🎫 門票","🏨 住宿","☕ 點心飲料","🎁 伴手禮","📦 其他"],CKC=["行前準備","行李","證件票券","購物清單"];
 var CURS={JPY:["¥",0.21],KRW:["₩",0.024],USD:["$",32],EUR:["€",35],THB:["฿",0.9],CNY:["¥",4.5],HKD:["HK$",4.1],TWD:["NT$",1],SGD:["S$",24],GBP:["£",41],AUD:["A$",21],VND:["₫",0.0013],MYR:["RM",7.2]};
-function st(m){$("st").textContent=m}
+function st(m){$("st").textContent=m;if($("hst"))$("hst").textContent=m}
 function tm(t){var m=/^(\d{1,2}):(\d{2})/.exec(t||"");return m?(+m[1])*60+(+m[2]):9999}
 function ml(m){if(!m)return "";var u=/^https?:\/\//i.test(m)?m:"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(m);return '<a class="m" target="_blank" rel="noopener" href="'+esc(u)+'">地圖</a>'}
 function iso(d){return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
@@ -104,53 +113,111 @@ function dl(s){var d=new Date(s+"T00:00:00");return (d.getMonth()+1)+"/"+d.getDa
 function sym(){return (CURS[T.cur]||[T.cur+" "])[0]}
 function money(n){var d=(T.cur==="JPY"||T.cur==="KRW"||T.cur==="VND")?0:2;return sym()+n.toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d})}
 function twd(n){return "NT$"+Math.round(n*T.rate).toLocaleString()}
-function norm(t){t.people=t.people&&t.people.length?t.people:[{id:"p0",name:"我"}];t.cats=t.cats&&t.cats.length?t.cats:DCATS;["plan","exp","ck","memo","wish"].forEach(function(k){t[k]=t[k]||{}});t.rate=t.rate>0?t.rate:1;t.cur=t.cur||"JPY";return t}
+function norm(t){t.people=t.people&&t.people.length?t.people:[{id:"p0",name:"我"}];t.cats=t.cats&&t.cats.length?t.cats:DCATS;["plan","exp","ck","memo","wish","jr"].forEach(function(k){t[k]=t[k]||{}});t.rate=t.rate>0?t.rate:1;t.cur=t.cur||"JPY";return t}
 /* 資料層 */
 function setPath(o,p,v){var k=p.split("."),i=0;for(;i<k.length-1;i++){if(typeof o[k[i]]!=="object"||o[k[i]]===null)o[k[i]]={};o=o[k[i]]}if(v===DEL)delete o[k[i]];else o[k[i]]=v}
 function wr(patch){if(!CUR||!T)return;
 if(cloud){var u={};for(var p in patch)u[p]=patch[p]===DEL?firebase.firestore.FieldValue.delete():patch[p];fdb.doc("trips/"+CUR).update(u).catch(function(){st("⚠️ 寫入失敗,請檢查網路或雲端規則")})}
 else{for(var p in patch)setPath(T,p,patch[p]);sv("tt_d_"+CUR,T);render()}}
-function syncList(){var f=false;TR.forEach(function(t){if(t.code===CUR&&T){var k=tkey();if(t.name!==T.name||t.th!==k){t.name=T.name;t.th=k;f=true}}});if(f)sv("tt_trips",TR)}
+function syncList(){var f=false;TR.forEach(function(t){if(t.code===CUR&&T){var k=tkey(),ds=(T.start||"")+(T.end?" ~ "+T.end:"");if(t.name!==T.name||t.th!==k||t.ds!==ds){t.name=T.name;t.th=k;t.ds=ds;f=true}}});if(f)sv("tt_trips",TR)}
 function openTrip(code){CUR=code;sv("tt_cur",code);if(unsub){unsub();unsub=null}T=null;
-if(cloud){unsub=fdb.doc("trips/"+code).onSnapshot(function(s){if(!s.exists){T=null;st("找不到這趟旅行");render();return}T=norm(s.data());syncList();render();var m=s.metadata||{};st(m.hasPendingWrites?"⏳ 同步中…":(m.fromCache?"📴 離線,顯示已存資料":"☁️ 已同步"))},function(){st("⚠️ 無法連線雲端")})}
-else{T=ld("tt_d_"+code,null);if(T)T=norm(T);syncList();render();st("📱 本機模式(尚未設定雲端同步)")}}
+if(cloud){unsub=fdb.doc("trips/"+code).onSnapshot(function(s){var m=s.metadata||{};
+if(!s.exists){T=null;if(m.fromCache){st("📴 尚未連上雲端,請確認網路");homeNote="目前連不上雲端,無法確認這趟旅行。請確認網路後再開啟一次。"}else{st("☁️ 雲端上找不到這趟旅行");homeNote="雲端上找不到這趟旅行。如果它是在設定雲端同步之前建立的,請在下方按該旅行的「☁️ 上傳到雲端」。"}wl=true;hd=false;render();return}
+homeNote="";T=norm(s.data());lastErr="";syncList();render();st(m.hasPendingWrites?"⏳ 同步中…":(m.fromCache?"📴 離線,顯示已存資料":"☁️ 已同步"))},
+function(err){lastErr=(err&&err.code)||String(err);st("⚠️ 無法連線雲端:"+(lastErr==="permission-denied"?"規則不允許(請檢查 Firestore 規則)":lastErr))})}
+else{T=ld("tt_d_"+code,null);if(T)T=norm(T);syncList();render();st(sdk==="fail"?"⚠️ 雲端同步載入失敗,目前使用本機模式":"📱 本機模式(尚未設定雲端同步)")}}
 function addTR(code,name){if(!TR.some(function(t){return t.code===code}))TR.push({code:code,name:name||"旅行"});sv("tt_trips",TR)}
 function rcode(){var a="abcdefghjkmnpqrstuvwxyz23456789",s="";for(var i=0;i<8;i++)s+=a[Math.floor(Math.random()*a.length)];return s}
 function wmsg(m){$("wmsg")&&($("wmsg").textContent=m)}
+function imp(){var o;try{o=JSON.parse($("wit").value)}catch(e){wmsg("內容格式不對,請貼上完整的 JSON");return}if(!o||typeof o!=="object"||!o.name){wmsg("這不是旅行資料檔");return}var t=norm(o),code=rcode();function done(){addTR(code,t.name);wl=false;openTrip(code)}if(cloud){fdb.doc("trips/"+code).set(t).catch(function(e){st("⚠️ 匯入失敗:"+((e&&e.code)||e)+"(請檢查網路與 Firestore 規則)")});done()}else{sv("tt_d_"+code,t);done()}}
 function mk(){var cu=$("wc").value,names=$("wp").value.split(/[,，、\n]+/).map(function(x){return x.trim()}).filter(Boolean);if(!names.length)names=["我","旅伴"];
 var ck={};[[0,"註冊入境/簽證所需資料"],[0,"準備網路(eSIM 或漫遊)"],[0,"兌換當地現金"],[1,"行動電源(手提)"],[1,"充電線與轉接頭"],[1,"常備藥品"],[2,"護照(效期 6 個月以上)"],[2,"機票與訂房資料"],[2,"信用卡"]].forEach(function(x){ck[uid()]={t:x[1],c:x[0],d:false}});
 var t={theme:wth,name:$("wn").value.trim()||"我的旅行",start:$("ws").value,end:$("we").value,cur:cu,rate:parseFloat($("wr").value)||CURS[cu][1],people:names.map(function(n,i){return {id:"p"+i,name:n}}),cats:DCATS.slice(),plan:{},exp:{},ck:ck,memo:{}},code=rcode();
 function done(){addTR(code,t.name);wl=false;openTrip(code)}
-if(cloud)fdb.doc("trips/"+code).set(t).then(done).catch(function(){wmsg("建立失敗,請檢查雲端設定與規則")});else{sv("tt_d_"+code,t);done()}}
+if(cloud){fdb.doc("trips/"+code).set(t).catch(function(e){st("⚠️ 建立失敗:"+((e&&e.code)||e)+"(請檢查網路與 Firestore 規則)")});done()}else{sv("tt_d_"+code,t);done()}}
 function join(c){c=(c||"").trim().toLowerCase();if(!c)return;if(!cloud){wmsg("加入旅行需要先在「設定」貼上雲端同步設定");return}
 fdb.doc("trips/"+c).get().then(function(s){if(!s.exists){wmsg("找不到這個代碼");return}addTR(c,s.data().name);wl=false;openTrip(c)}).catch(function(){wmsg("無法連線,請檢查網路")})}
 /* 畫面 */
-var TN=["🗓️ 行程","💰 記帳","✅ 清單","📝 備忘","⚙️ 設定"];
+var TN=["🗓️ 行程","💰 記帳","✅ 清單","📝 備忘","📖 遊記","⚙️ 設定"];
 $("nav").innerHTML=TN.map(function(t,i){return '<button data-t="'+i+'">'+t+'</button>'}).join("");
-$("nav").onclick=function(e){var b=e.target.closest("button");if(b){tab=+b.getAttribute("data-t");show();if(tab===4)drawSet()}};
+$("nav").onclick=function(e){var b=e.target.closest("button");if(b){tab=+b.getAttribute("data-t");show();if(tab===5)drawSet()}};
 function show(){[].forEach.call(document.querySelectorAll("section"),function(s,i){s.className=i===tab?"on":""});[].forEach.call($("nav").children,function(b,i){b.className=i===tab?"on":""});window.scrollTo(0,0)}
-function drawWl(){var cs=Object.keys(CURS).map(function(k){return '<option value="'+k+'">'+k+' '+CURS[k][0]+'</option>'}).join("");var d=new Date(),e=new Date();e.setDate(e.getDate()+4);
-$("wlb").innerHTML='<h2>✈️ 旅伴記</h2><div class="card"><h3>建立新旅行</h3><label>旅行名稱</label><input id="wn" placeholder="例如 福岡自由行"><label>出發日</label><input id="ws" type="date" value="'+iso(d)+'"><label>回程日</label><input id="we" type="date" value="'+iso(e)+'"><label>旅伴名字(用逗號或換行分隔,可以有很多人)</label><textarea id="wp" rows="2" placeholder="例如 Albert, Betty, Cindy"></textarea><label>當地貨幣</label><select id="wcs">'+cs+'</select><label>匯率(1 當地貨幣 = ? 台幣,預設值僅供參考)</label><input id="wr" type="number" step="any"><label>旅程配色</label><div class="chips" id="wth"></div><button class="btn" id="wmk">建立旅行</button></div><div class="card"><h3>加入朋友建立的旅行</h3><label>旅行代碼或邀請連結</label><input id="wj" placeholder="例如 k3m9x2ab"><button class="btn" id="wjn">加入</button></div><div class="msg" id="wmsg"></div>'+(T?'<button class="btn s" id="wcl">返回</button>':"")+(cloud?"":'<div class="card mu">目前是本機模式。要讓多人同步,請先到「設定」貼上 Firebase 設定。</div>');
-$("wc")||0;var sel=$("wcs");sel.id="wc";sel.onchange=function(){$("wr").value=CURS[sel.value][1]};$("wr").value=CURS.JPY[1];
-function dw(){swch($("wth"),wth,function(k){wth=k;applyTheme(k);dw()})}dw();$("wmk").onclick=mk;$("wjn").onclick=function(){var v=$("wj").value,m=/#?([a-z0-9]{8})\s*$/i.exec(v);join(m?m[1]:v)};if($("wcl"))$("wcl").onclick=function(){wl=false;render()}}
-function render(){$("wl").className=(wl||!T)?"on":"";$("tfab").style.display=(wl||!T)?"none":"flex";if(wl||!T)$("tp").className="";if(wl||!T){drawWl();applyTheme(wth);if(!T&&CUR&&cloud&&!wl)wmsg("找不到旅行,可建立或加入新的");$("tn").textContent="旅伴記";return}
-applyTheme(tkey());$("tn").textContent=TH[curK][0]+" "+T.name;$("tsel").innerHTML=TR.map(function(t){return '<option value="'+t.code+'"'+(t.code===CUR?" selected":"")+'>'+(TH[t.th]?TH[t.th][0]+" ":"")+esc(t.name)+'</option>'}).join("");
-drawWish();drawPlan();drawExp();drawCk();drawMm();toolsSync();if(tab===4&&!document.activeElement.closest("#set"))drawSet();show.last||show();show.last=1}
-$("tsel").onchange=function(){openTrip(this.value)};$("tnew").onclick=function(){wl=true;render()};
+function hasLocal(c){try{return !!localStorage.getItem("tt_d_"+c)}catch(e){return false}}
+var hd=false,homeNote="";
+function showHome(){wl=true;hd=false;render()}
+function drawWl(){var cs=Object.keys(CURS).map(function(k){return '<option value="'+k+'">'+k+' '+CURS[k][0]+'</option>'}).join(""),d=new Date(),e=new Date();e.setDate(e.getDate()+4);
+var lst=TR.length?TR.map(function(t){var loc=cloud&&hasLocal(t.code);return '<div class="card" style="margin-bottom:8px"><div style="display:flex;gap:8px;align-items:center"><div style="flex:1;min-width:0"><b>'+(TH[t.th]?TH[t.th][0]+" ":"✈️ ")+esc(t.name)+'</b><div class="mu">'+esc(t.ds||"")+(loc?" ・ 僅存在這支手機":"")+(t.code===CUR&&T?" ・ 目前開啟":"")+'</div></div><button class="btn s" style="margin:0" data-a="hopen" data-c="'+t.code+'">開啟</button></div>'+(loc?'<button class="btn s" data-a="hup" data-c="'+t.code+'">☁️ 上傳到雲端</button>':"")+'<button class="btn s" data-a="hrm" data-c="'+t.code+'">移除</button></div>'}).join(""):'<p class="mu">還沒有旅行。可以建立新旅行,或用朋友給的代碼加入。</p>';
+$("wlb").innerHTML='<h2>✈️ 旅伴記</h2><div class="mu" id="hst">'+esc($("st").textContent)+'</div>'+(homeNote?'<div class="card" style="background:var(--ac2)">'+esc(homeNote)+'</div>':"")+(T?'<button class="btn s" data-a="hback">← 回到目前旅行</button>':"")+'<h3 style="margin:12px 0 6px;display:block;background:none;padding:0">我的旅行</h3>'+lst+
+'<div class="card"><h3>加入朋友建立的旅行</h3><label>旅行代碼或邀請連結</label><input id="wj" placeholder="例如 k3m9x2ab"><button class="btn" id="wjn">加入</button></div>'+
+'<details class="card"'+(TR.length?"":" open")+'><summary style="cursor:pointer"><b>＋ 建立新旅行</b></summary><label>旅行名稱</label><input id="wn" placeholder="例如 福岡自由行"><label>出發日</label><input id="ws" type="date" value="'+iso(d)+'"><label>回程日</label><input id="we" type="date" value="'+iso(e)+'"><label>旅伴名字(用逗號或換行分隔,人數不限)</label><textarea id="wp" rows="2" placeholder="例如 Albert, Betty, Cindy"></textarea><label>當地貨幣</label><select id="wc">'+cs+'</select><label>匯率(1 當地貨幣 = ? 台幣,預設值僅供參考)</label><input id="wr" type="number" step="any"><label>旅程配色</label><div class="chips" id="wth"></div><button class="btn" id="wmk">建立旅行</button></details>'+
+'<details class="card"><summary style="cursor:pointer"><b>匯入旅行資料</b></summary><label>選擇檔案(.json)</label><input type="file" id="wif" accept=".json,application/json"><label>或貼上內容</label><textarea id="wit" rows="3"></textarea><button class="btn" id="wim">匯入成新的旅行</button></details><div class="msg" id="wmsg"></div>'+(cloud?"":'<div class="card mu">目前是本機模式。要讓多人同步,請先到「設定」貼上 Firebase 設定。</div>');
+var sel=$("wc");sel.onchange=function(){$("wr").value=CURS[sel.value][1]};$("wr").value=CURS.JPY[1];
+function dw(){swch($("wth"),wth,function(k){wth=k;applyTheme(k);dw()})}dw();$("wmk").onclick=mk;$("wif").onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){$("wit").value=r.result};r.readAsText(f)};$("wim").onclick=imp;$("wjn").onclick=function(){var v=$("wj").value,m=/#?([a-z0-9]{8})\s*$/i.exec(v);join(m?m[1]:v)};hd=true}
+$("wlb").addEventListener("click",function(e){var b=e.target.closest("button[data-a]");if(!b)return;var a=b.getAttribute("data-a"),c=b.getAttribute("data-c");
+if(a==="hback"){wl=false;hd=false;render()}else if(a==="hopen"){wl=false;hd=false;homeNote="";openTrip(c)}
+else if(a==="hup"){var t=ld("tt_d_"+c,null);if(!t||!cloud)return;fdb.doc("trips/"+c).set(norm(t)).then(function(){try{localStorage.removeItem("tt_d_"+c)}catch(x){}}).catch(function(e){st("⚠️ 上傳失敗:"+((e&&e.code)||e)+"(請檢查網路與 Firestore 規則)")});wl=false;hd=false;homeNote="";openTrip(c)}
+else if(a==="hrm")arm(b,"確定移除?",function(){TR=TR.filter(function(t){return t.code!==c});sv("tt_trips",TR);try{localStorage.removeItem("tt_d_"+c)}catch(x){}if(c===CUR){if(unsub){unsub();unsub=null}T=null;CUR=null;sv("tt_cur",null)}hd=false;render()})});
+
+function render(){var home=wl||!T;$("wl").className=home?"on":"";$("tfab").style.display=home?"none":"flex";
+if(home){$("tp").className="";if(!hd){drawWl();applyTheme(T?tkey():wth)}else if($("hst"))$("hst").textContent=$("st").textContent;$("tn").textContent="旅伴記";return}
+hd=false;applyTheme(tkey());$("tn").textContent=TH[curK][0]+" "+T.name;$("tsel").innerHTML=TR.map(function(t){return '<option value="'+t.code+'"'+(t.code===CUR?" selected":"")+'>'+(TH[t.th]?TH[t.th][0]+" ":"")+esc(t.name)+'</option>'}).join("");
+drawWish();drawPlan();drawExp();drawCk();drawMm();drawJr();toolsSync();if(tab===5&&!document.activeElement.closest("#set"))drawSet();show.last||show();show.last=1}
+$("tsel").onchange=function(){openTrip(this.value)};$("tnew").onclick=showHome;
 /* 行程 */
-var pe=null;
+var pe=null,DURS=[15,30,45,60,90,120,150,180,240,300];
+function mm(t){var m=/^(\d{1,2}):(\d{2})/.exec(t||"");return m?(+m[1])*60+(+m[2]):null}
+function fmt(m){m=Math.max(0,Math.min(1439,Math.round(m)));return ("0"+Math.floor(m/60)).slice(-2)+":"+("0"+(m%60)).slice(-2)}
+function r5(m){return Math.ceil(m/5)*5}
+function toast(m){var e=$("toast");e.textContent=m;e.className="on";clearTimeout(toast.t);toast.t=setTimeout(function(){e.className=""},4200)}
 function days(){var o=[];if(T.start&&T.end){var d=new Date(T.start+"T00:00:00"),z=new Date(T.end+"T00:00:00");for(var n=0;d<=z&&n<60;n++){o.push(iso(d));d.setDate(d.getDate()+1)}}for(var k in T.plan){var x=T.plan[k].d;if(o.indexOf(x)<0)o.push(x)}return o.sort()}
-function pform(d,id,v){return '<div style="background:var(--ac2);border-radius:12px;padding:10px;margin:6px 0"><label>時間</label><input id="pt" value="'+esc(v.t)+'" placeholder="例如 09:30"><label>行程</label><input id="px" value="'+esc(v.x)+'"><label>地圖(地點名稱或 Google 地圖連結)</label><input id="pm" value="'+esc(v.m)+'"><label>備註</label><textarea id="pn" rows="2">'+esc(v.n)+'</textarea><button class="btn" data-a="save">儲存</button><button class="btn s" data-a="cancel">取消</button>'+(id?'<button class="btn s" data-a="del">刪除</button>':"")+'</div>'}
-function drawPlan(){if(pe&&$("pt"))pe.v={t:$("pt").value,x:$("px").value,m:$("pm").value,n:$("pn").value};
-var ds=days();$("plan").innerHTML=(ds.length?"":'<div class="card mu">到「設定」填出發日與回程日,就會出現每天的行程欄。</div>')+ds.map(function(d,di){
-var its=Object.keys(T.plan).map(function(k){var x=T.plan[k];x.id=k;return x}).filter(function(x){return x.d===d}).sort(function(a,b){return tm(a.t)-tm(b.t)||a.id.localeCompare(b.id)});
-var rows=its.map(function(x){if(pe&&pe.id===x.id)return pform(d,x.id,pe.v||{t:x.t,x:x.x,m:x.m,n:x.n});return '<div class="row"><b>'+esc(x.t)+'</b><div>'+esc(x.x)+ml(x.m)+(x.n?'<div class="mu" style="white-space:pre-wrap">📝 '+esc(x.n)+'</div>':"")+'</div><button class="ed" data-a="edit" data-id="'+x.id+'">✏️</button></div>'}).join("");
-var add=(pe&&!pe.id&&pe.d===d)?pform(d,null,pe.v||{t:"",x:"",m:"",n:""}):'<button class="btn s" data-a="add" data-d="'+d+'">＋ 新增行程</button>';
+function dayList(d){var L=Object.keys(T.plan).map(function(k){var x=T.plan[k];return {id:k,d:x.d,t:x.t,x:x.x,m:x.m,n:x.n,u:x.u,k:!!x.k}}).filter(function(x){return x.d===d});
+L.sort(function(a,b){var ta=mm(a.t),tb=mm(b.t);return (ta===null?9999:ta)-(tb===null?9999:tb)||a.id.localeCompare(b.id)});
+for(var i=0;i<L.length;i++){var s=mm(L[i].t);L[i].s=s;var u=+L[i].u;if(!(u>=5)){var nx=L[i+1],ns=nx?mm(nx.t):null;u=(s!==null&&ns!==null&&ns>s)?Math.min(240,Math.max(15,ns-s)):60}L[i].du=u}
+return L}
+function nextSlot(d){var L=dayList(d).filter(function(x){return x.s!==null});if(!L.length)return 540;var l=L[L.length-1];return Math.min(1320,r5(l.s+l.du))}
+function dayStart(L){for(var i=0;i<L.length;i++)if(L[i].s!==null)return L[i].s;return 540}
+function reflow(L,ds){var n=L.length,out=new Array(n),lk=[],i,j;
+for(i=0;i<n;i++)if(L[i].k&&L[i].s!==null)lk.push(i);
+for(j=1;j<lk.length;j++){var a=L[lk[j-1]],b=L[lk[j]];if(b.s<a.s+a.du)return {ok:false,msg:"兩個鎖定的行程順序與時間衝突,無法調整順序"}}
+lk.forEach(function(i){out[i]={id:L[i].id,s:L[i].s,du:L[i].du}});
+var bd=[-1].concat(lk,[n]);
+for(var q=0;q<bd.length-1;q++){var lo=bd[q],hi=bd[q+1],seg=[];for(i=lo+1;i<hi;i++)seg.push(L[i]);if(!seg.length)continue;
+var lb=lo>=0?out[lo].s+out[lo].du:null,ub=hi<n?out[hi].s:null,dur=seg.map(function(x){return x.du}),tot=dur.reduce(function(a,x){return a+x},0),cur=lb!==null?lb:ds;
+if(ub!==null){if(lb===null)cur=Math.max(300,Math.min(cur,ub-tot));cur=r5(cur);var av=ub-cur;
+if(tot>av){if(av<seg.length*15)return {ok:false,msg:"空檔不夠,無法調整順序"};var f=av/tot;dur=dur.map(function(u){return Math.max(15,Math.floor(u*f/5)*5)});
+while(dur.reduce(function(a,x){return a+x},0)>av){var mi=dur.indexOf(Math.max.apply(null,dur));if(dur[mi]<=15)return {ok:false,msg:"空檔不夠,無法調整順序"};dur[mi]-=5}}}
+else{cur=r5(cur);if(cur+tot>1439)return {ok:false,msg:"超出當天時間,無法調整順序"}}
+seg.forEach(function(x,k){out[lo+1+k]={id:x.id,s:cur,du:dur[k]};cur+=dur[k]})}
+return {ok:true,out:out}}
+function applyFlow(L,r){var p={};r.out.forEach(function(o){p["plan."+o.id+".t"]=fmt(o.s);p["plan."+o.id+".u"]=o.du});wr(p)}
+function reorder(d,id,idx){var L=dayList(d),from=-1;L.forEach(function(x,i){if(x.id===id)from=i});if(from<0)return;var ds=dayStart(L),it=L.splice(from,1)[0];L.splice(idx,0,it);
+var r=reflow(L,ds);if(!r.ok){toast("⚠️ "+r.msg);drawPlan();return}applyFlow(L,r);toast("已重新排序並調整時間");if(cloud)drawPlan()}
+function pform(id,v){var ds=DURS.indexOf(v.u)>=0?DURS:DURS.concat([v.u]).sort(function(a,b){return a-b});
+return '<div style="background:var(--ac2);border-radius:14px;padding:10px;margin:6px 0"><label>開始時間</label><input id="pt" type="time" value="'+esc(v.t)+'"><label>預計停留</label><select id="pu">'+ds.map(function(u){return '<option value="'+u+'"'+(u===v.u?" selected":"")+'>'+(u>=60?(u/60)+" 小時":u+" 分鐘")+'</option>'}).join("")+'</select><label class="ck" style="margin-top:8px"><input type="checkbox" id="pk"'+(v.k?" checked":"")+'>🔒 鎖定這個時間(拖曳排序時不會被移動)</label><label>行程</label><input id="px" value="'+esc(v.x)+'"><label>地圖(地點名稱或 Google 地圖連結)</label><input id="pm" value="'+esc(v.m)+'"><label>備註</label><textarea id="pn" rows="2">'+esc(v.n)+'</textarea><button class="btn" data-a="save">儲存</button><button class="btn s" data-a="cancel">取消</button>'+(id?'<button class="btn s" data-a="del">刪除</button>':"")+'</div>'}
+function drawPlan(){if(pe&&$("pt"))pe.v={t:$("pt").value,x:$("px").value,m:$("pm").value,n:$("pn").value,u:+$("pu").value||60,k:$("pk").checked};
+var ds=days();$("plan").innerHTML=(ds.length?"":'<div class="card mu">到「設定」填出發日與回程日,就會出現每天的行程欄。</div>')+ds.map(function(d,di){var L=dayList(d);
+var rows=L.map(function(x){if(pe&&pe.id===x.id)return pform(x.id,pe.v||{t:x.t,x:x.x,m:x.m,n:x.n,u:x.du,k:x.k});
+return '<div class="row" data-id="'+x.id+'"><span class="dg" data-id="'+x.id+'" title="按住拖曳排序">⠿</span><b style="min-width:54px">'+esc(x.t||"--:--")+'<div class="mu" style="font-weight:400;font-size:.72rem;line-height:1.3">'+(x.s!==null?"→"+fmt(x.s+x.du)+"<br>":"")+x.du+" 分</div></b><div>"+esc(x.x)+ml(x.m)+(x.n?'<div class="mu" style="white-space:pre-wrap">📝 '+esc(x.n)+'</div>':"")+'</div><button class="ed" data-a="lock" data-id="'+x.id+'" aria-label="鎖定時間">'+(x.k?"🔒":"🔓")+'</button><button class="ed" data-a="edit" data-id="'+x.id+'" aria-label="編輯">✏️</button></div>'}).join("");
+var add=(pe&&!pe.id&&pe.d===d)?pform(null,pe.v||{t:fmt(nextSlot(d)),x:"",m:"",n:"",u:60,k:false}):'<button class="btn s" data-a="add" data-d="'+d+'">＋ 新增行程</button>'+(L.length>1?'<button class="btn s" data-a="tidy" data-d="'+d+'">🔄 整理時間</button>':"");
 return '<div class="card"><h3>第 '+(di+1)+' 天 ・ '+dl(d)+'</h3>'+rows+add+'</div>'}).join("")}
-$("plan").addEventListener("click",function(e){var b=e.target.closest("button[data-a]");if(!b)return;var a=b.getAttribute("data-a");
-if(a==="edit"){pe={id:b.getAttribute("data-id")};drawPlan()}else if(a==="add"){pe={id:null,d:b.getAttribute("data-d")};drawPlan()}else if(a==="cancel"){pe=null;drawPlan()}
-else if(a==="save"){var v={t:$("pt").value.trim(),x:$("px").value.trim(),m:$("pm").value.trim(),n:$("pn").value.trim()};if(!v.x){$("px").focus();return}var id=pe.id||uid(),d=pe.id?T.plan[pe.id].d:pe.d,p={};p["plan."+id]={d:d,t:v.t,x:v.x,m:v.m,n:v.n};pe=null;wr(p);if(cloud)drawPlan()}
-else if(a==="del"){arm(b,"確定刪除?",function(){var p={};p["plan."+pe.id]=DEL;pe=null;wr(p)})}});
+$("plan").addEventListener("click",function(e){var b=e.target.closest("button[data-a]");if(!b)return;var a=b.getAttribute("data-a"),id=b.getAttribute("data-id"),p={};
+if(a==="edit"){pe={id:id};drawPlan()}else if(a==="add"){pe={id:null,d:b.getAttribute("data-d")};drawPlan()}else if(a==="cancel"){pe=null;drawPlan()}
+else if(a==="save"){var v={t:$("pt").value,x:$("px").value.trim(),m:$("pm").value.trim(),n:$("pn").value.trim(),u:+$("pu").value||60,k:$("pk").checked};if(!v.x){$("px").focus();return}
+var d=pe.id?T.plan[pe.id].d:pe.d,sid=pe.id||uid();if(!v.t)v.t=fmt(nextSlot(d));var s=mm(v.t),others=dayList(d).filter(function(y){return y.id!==sid&&y.s!==null&&s<y.s+y.du&&y.s<s+v.u});
+if(v.k){var c=others.filter(function(y){return y.k})[0];if(c){toast("⚠️ 與已鎖定的「"+c.x+"」時間衝突,無法鎖定在這個時間");return}}
+p["plan."+sid]={d:d,t:v.t,x:v.x,m:v.m,n:v.n,u:v.u,k:v.k};pe=null;wr(p);if(others.length)toast("⚠️ 與「"+others[0].x+"」時間重疊,可按「🔄 整理時間」自動調整");if(cloud)drawPlan()}
+else if(a==="del"){arm(b,"確定刪除?",function(){p["plan."+pe.id]=DEL;pe=null;wr(p)})}
+else if(a==="lock"){var it=T.plan[id],L=dayList(it.d),me=L.filter(function(y){return y.id===id})[0],nk=!it.k;
+if(nk&&me.s!==null){var c2=L.filter(function(y){return y.id!==id&&y.k&&y.s!==null&&me.s<y.s+y.du&&y.s<me.s+me.du})[0];if(c2){toast("⚠️ 與已鎖定的「"+c2.x+"」重疊,無法鎖定");return}}
+p["plan."+id+".k"]=nk;p["plan."+id+".u"]=me.du;wr(p);toast(nk?"已鎖定時間":"已解除鎖定")}
+else if(a==="tidy"){var dd=b.getAttribute("data-d"),L2=dayList(dd),r=reflow(L2,dayStart(L2));if(!r.ok){toast("⚠️ "+r.msg);return}applyFlow(L2,r);toast("已整理時間")}});
+var dr=null;
+function clearOver(c){[].forEach.call(c.querySelectorAll(".row"),function(r){r.classList.remove("over","overend")})}
+$("plan").addEventListener("pointerdown",function(e){var g=e.target.closest(".dg");if(!g)return;e.preventDefault();var row=g.closest(".row");dr={id:g.getAttribute("data-id"),row:row,card:row.parentNode,idx:-1};row.classList.add("dragging");try{g.setPointerCapture(e.pointerId)}catch(x){}});
+$("plan").addEventListener("pointermove",function(e){if(!dr)return;var rows=[].slice.call(dr.card.querySelectorAll(".row[data-id]"));clearOver(dr.card);var idx=rows.length;for(var i=0;i<rows.length;i++){var r=rows[i].getBoundingClientRect();if(e.clientY<r.top+r.height/2){idx=i;break}}dr.idx=idx;if(idx<rows.length)rows[idx].classList.add("over");else rows[rows.length-1].classList.add("overend");
+if(e.clientY<90)window.scrollBy(0,-14);else if(e.clientY>innerHeight-90)window.scrollBy(0,14)});
+function endDrag(ok){if(!dr)return;var d0=dr;dr=null;d0.row.classList.remove("dragging");clearOver(d0.card);if(!ok||d0.idx<0)return;var rows=[].slice.call(d0.card.querySelectorAll(".row[data-id]")),from=rows.indexOf(d0.row),to=d0.idx;if(to>from)to--;if(to===from||from<0)return;reorder(T.plan[d0.id].d,d0.id,to)}
+$("plan").addEventListener("pointerup",function(){endDrag(true)});$("plan").addEventListener("pointercancel",function(){endDrag(false)});
 /* 記帳 */
 var ec=0,ep=null,es=[];
 function chips(el,items,on,fn,rd){el.innerHTML=items.map(function(t){return '<button type="button" class="chip'+(on(t[0])?" on":"")+'" data-v="'+esc(t[0])+'">'+esc(t[1])+'</button>'}).join("");el.onclick=function(e){var b=e.target.closest("button");if(b){fn(b.getAttribute("data-v"));(rd||drawExp)()}}}
@@ -192,13 +259,54 @@ return '<div class="card"><b>'+esc(m.t||"備忘")+'</b><p style="margin:4px 0;wh
 $("mlist").addEventListener("click",function(e){var b=e.target.closest("button[data-a]");if(!b)return;var a=b.getAttribute("data-a"),id=b.getAttribute("data-id");if(a==="me"){em={id:id};drawMm()}else if(a==="mc"){em=null;drawMm()}
 else if(a==="ms"){var p={};p["memo."+id+".t"]=$("et").value.trim().slice(0,40);p["memo."+id+".b"]=$("eb").value.trim();em=null;wr(p)}else if(a==="md")arm(b,"確定刪除?",function(){var p={};p["memo."+id]=DEL;wr(p)})});
 $("madd").onclick=function(){var b=$("mb").value.trim();if(!b){$("mb").focus();return}var n=new Date(),p={};p["memo."+uid()]={t:$("mt").value.trim().slice(0,40),b:b,ts:(n.getMonth()+1)+"/"+n.getDate()+" "+("0"+n.getHours()).slice(-2)+":"+("0"+n.getMinutes()).slice(-2)};$("mt").value="";$("mb").value="";wr(p)};
+/* 遊記(只存在這支手機,不同步) */
+var JDB=new Promise(function(res){try{var r=indexedDB.open("tt_photos",1);r.onupgradeneeded=function(){r.result.createObjectStore("p")};r.onsuccess=function(){res(r.result)};r.onerror=function(){res(null)}}catch(e){res(null)}}),jmem={},je=null,jxp=null,jlb=null,JR={};
+function jk(p){return CUR+"/"+p}
+function jput(p,v){jmem[jk(p)]=v;return JDB.then(function(d){if(!d)return false;return new Promise(function(res){try{var t=d.transaction("p","readwrite");t.objectStore("p").put(v,jk(p));t.oncomplete=function(){res(true)};t.onerror=function(){res(false)}}catch(e){res(false)}})})}
+function jget(p){var k=jk(p);if(jmem[k])return Promise.resolve(jmem[k]);return JDB.then(function(d){return new Promise(function(res){if(!d){res(null);return}try{var q=d.transaction("p").objectStore("p").get(k);q.onsuccess=function(){var v=q.result||null;if(v)jmem[k]=v;res(v)};q.onerror=function(){res(null)}}catch(e){res(null)}})})}
+function jdel(p){delete jmem[jk(p)];JDB.then(function(d){if(d)try{d.transaction("p","readwrite").objectStore("p").delete(jk(p))}catch(e){}})}
+function saveJ(){sv("tt_jr_"+CUR,JR)}
+function compress(file){return new Promise(function(res){var u=URL.createObjectURL(file),im=new Image();im.onload=function(){var s=Math.min(1,1400/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);var q=.75,d=c.toDataURL("image/jpeg",q);while(d.length>900000&&q>.35){q-=.08;d=c.toDataURL("image/jpeg",q)}res(d)};im.onerror=function(){URL.revokeObjectURL(u);res(null)};im.src=u})}
+async function addPhotos(files){var ids=[],bad=0,mem=0;for(var i=0;i<files.length;i++){var d=await compress(files[i]);if(!d){bad++;continue}var pid=uid(),ok=await jput(pid,d);if(!ok)mem++;ids.push(pid)}if(bad)toast("⚠️ "+bad+" 張照片無法加入(格式不支援)");if(mem)toast("⚠️ 這個瀏覽器無法長期保存照片,關閉後可能消失,請先匯出");return ids}
+function drawJr(){if(!T)return;JR=ld("tt_jr_"+CUR,{});if(je&&$("jet"))je.v={t:$("jet").value,b:$("jeb").value};
+var ds=days(),sd=$("jd").value;$("jd").innerHTML=ds.map(function(d){return '<option value="'+d+'">'+dl(d)+'</option>'}).join("");var td=iso(new Date());$("jd").value=ds.indexOf(sd)>=0?sd:(ds.indexOf(td)>=0?td:ds[0]);
+var L=Object.keys(JR).map(function(k){var x=JR[k];x.id=k;return x}).sort(function(a,b){return (b.d||"").localeCompare(a.d||"")||(b.ts||0)-(a.ts||0)});
+$("jlist").innerHTML=L.length?L.map(function(x){var ps=x.p||[];
+if(je&&je.id===x.id){var v=je.v||{t:x.t,b:x.b};return '<div class="card"><label>標題</label><input id="jet" value="'+esc(v.t)+'"><label>內容</label><textarea id="jeb" rows="5">'+esc(v.b)+'</textarea><button class="btn s" data-a="jsave" data-id="'+x.id+'">儲存</button><button class="btn s" data-a="jcancel">取消</button></div>'}
+return '<div class="card"><div class="mu">'+(x.d?dl(x.d):"")+'</div><h3 style="display:block;background:none;padding:0">'+esc(x.t||"遊記")+'</h3>'+(x.b?'<p style="margin:4px 0;white-space:pre-wrap">'+esc(x.b)+'</p>':"")+(ps.length?'<div class="jg">'+ps.map(function(p){return '<img class="jp" data-pid="'+p+'" data-id="'+x.id+'" alt="照片">'}).join("")+'</div>':"")+'<div><button class="btn s" data-a="jaddp" data-id="'+x.id+'">📷 加照片</button><button class="btn s" data-a="jedit" data-id="'+x.id+'">編輯</button><button class="btn s" data-a="jdel" data-id="'+x.id+'">刪除</button></div></div>'}).join(""):'<p class="mu">還沒有遊記。選幾張照片、寫幾句話,就是一篇遊記。</p>';
+[].forEach.call($("jlist").querySelectorAll("img.jp"),function(im){jget(im.getAttribute("data-pid")).then(function(s){if(s)im.src=s})})}
+$("jlist").addEventListener("click",function(e){var im=e.target.closest("img.jp");if(im){var pid=im.getAttribute("data-pid");jlb={p:pid,e:im.getAttribute("data-id")};jget(pid).then(function(s){if(s){$("plbi").src=s;$("plb").classList.add("on")}});return}
+var b=e.target.closest("button[data-a]");if(!b)return;var a=b.getAttribute("data-a"),id=b.getAttribute("data-id");
+if(a==="jedit"){je={id:id};drawJr()}else if(a==="jcancel"){je=null;drawJr()}
+else if(a==="jsave"){if(JR[id]){JR[id].t=$("jet").value.trim().slice(0,60);JR[id].b=$("jeb").value.trim();saveJ()}je=null;drawJr()}
+else if(a==="jaddp"){jxp=id;$("jf2").value="";$("jf2").click()}
+else if(a==="jdel")arm(b,"確定刪除?",function(){((JR[id]||{}).p||[]).forEach(jdel);delete JR[id];saveJ();drawJr()})});
+$("jf2").onchange=async function(){var id=jxp;if(!JR[id])return;var ids=await addPhotos([].slice.call(this.files));if(!ids.length)return;JR[id].p=(JR[id].p||[]).concat(ids);saveJ();drawJr();toast("已加入 "+ids.length+" 張照片")};
+$("jf").onchange=function(){$("jfc").textContent=this.files.length?"已選 "+this.files.length+" 張照片":""};
+$("jadd").onclick=async function(){var fs=[].slice.call($("jf").files),t=$("jt").value.trim(),b=$("jb").value.trim();if(!t&&!b&&!fs.length){toast("請先寫點內容或選照片");return}
+var btn=this;btn.disabled=true;btn.textContent="處理照片中…";var ids=await addPhotos(fs);JR[uid()]={d:$("jd").value,t:t.slice(0,60),b:b,p:ids,ts:Date.now()};saveJ();
+$("jt").value="";$("jb").value="";$("jf").value="";$("jfc").textContent="";btn.disabled=false;btn.textContent="儲存遊記";drawJr();toast("遊記已儲存在這支手機")};
+$("plbx").onclick=function(){$("plb").classList.remove("on");$("plbi").removeAttribute("src")};
+$("plbd").onclick=function(){var b=$("plbd");arm(b,"確定刪除?",function(){var en=JR[jlb.e];if(en){en.p=(en.p||[]).filter(function(x){return x!==jlb.p});jdel(jlb.p);saveJ()}$("plb").classList.remove("on");$("plbi").removeAttribute("src");drawJr()})};
+$("jex").onclick=async function(){JR=ld("tt_jr_"+CUR,{});var ks=Object.keys(JR);if(!ks.length){toast("還沒有遊記可以匯出");return}var btn=$("jex");btn.disabled=true;btn.textContent="產生檔案中…";
+try{var L=ks.map(function(k){var x=JR[k];x.id=k;return x}).sort(function(a,b){return (a.d||"").localeCompare(b.d||"")||(a.ts||0)-(b.ts||0)});
+var K=tkey(),ac=TH[K][2],c={bg:mix(ac,"#ffffff",.07),ac2:mix(ac,"#ffffff",.2),bd:mix(ac,"#ffffff",.3),tx:mix(ac,"#1e1e1e",.1),mu:mix(ac,"#7a7a7a",.25),hg:"linear-gradient(135deg,"+mix(ac,"#ffffff",.5)+","+ac+")"},body="",last=null;
+for(var i=0;i<L.length;i++){var x=L[i];if(x.d!==last){last=x.d;body+="<h2>"+esc(x.d?dl(x.d):"")+"</h2>"}var im="",ps=x.p||[];for(var j=0;j<ps.length;j++){var s=await jget(ps[j]);if(s)im+='<img src="'+s+'" alt="">'}
+body+="<article><h3>"+esc(x.t||"遊記")+"</h3>"+(x.b?"<p>"+esc(x.b)+"</p>":"")+(im?'<div class="g">'+im+"</div>":"")+"</article>"}
+var css="*{box-sizing:border-box}body{margin:0;background:"+c.bg+";color:"+c.tx+';font:16px/1.8 "Huninn","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}header{background:'+c.hg+";color:#fff;text-align:center;padding:36px 16px 30px;border-radius:0 0 32px 32px}header h1{margin:0;font-size:1.7rem}header p{margin:6px 0 0;opacity:.95}main{max-width:820px;margin:auto;padding:16px}h2{color:"+ac+";border-bottom:3px solid "+c.ac2+";padding-bottom:4px;margin:28px 0 10px}article{background:#fff;border:1px solid "+c.bd+";border-radius:20px;padding:14px 16px;margin:0 0 16px;box-shadow:0 4px 14px rgba(0,0,0,.06)}article h3{margin:0 0 6px}article p{margin:6px 0;white-space:pre-wrap}.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:10px}.g img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;cursor:zoom-in}footer{text-align:center;color:"+c.mu+";font-size:.8rem;padding:24px}#o{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:10px;z-index:9}#o.on{display:flex}#o img{max-width:100%;max-height:100%;border-radius:10px}",
+names=T.people.map(function(p){return p.name}).join("、"),
+js='document.querySelectorAll(".g img").forEach(function(i){i.onclick=function(){var o=document.getElementById("o");o.firstChild.src=i.src;o.className="on"}});document.getElementById("o").onclick=function(){this.className=""};',
+html='<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(T.name)+' 遊記</title><style>'+css+"</style></head><body><header><h1>"+esc(TH[K][0]+" "+T.name)+"</h1><p>"+esc((T.start||"")+(T.end?" ~ "+T.end:""))+" ・ "+esc(names)+"</p></header><main>"+body+'</main><footer>由旅伴記產生</footer><div id="o"><img alt=""></div><script>'+js+"<\/script></body></html>";
+var blob=new Blob([html],{type:"text/html"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=(T.name||"travel").replace(/[\\\/:*?"<>|]/g,"_")+"-遊記.html";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},3000);toast("已匯出遊記檔案")}catch(err){toast("⚠️ 匯出失敗:"+err)}
+btn.disabled=false;btn.textContent="📄 匯出遊記成 HTML 檔"};
+
 /* 設定 */
 function drawSet(){if(!T)return;var cs=Object.keys(CURS).map(function(k){return '<option'+(k===T.cur?" selected":"")+'>'+k+'</option>'}).join("");
 $("set").innerHTML='<div class="card"><h3>旅行資訊</h3><label>名稱</label><input id="sn" value="'+esc(T.name)+'"><label>出發日</label><input id="ss" type="date" value="'+esc(T.start||"")+'"><label>回程日</label><input id="se" type="date" value="'+esc(T.end||"")+'"><label>當地貨幣</label><select id="sc">'+cs+'</select><label>匯率(1 當地貨幣 = ? 台幣)</label><input id="sr" type="number" step="any" value="'+T.rate+'"><button class="btn" id="ssv">儲存</button></div>'+
 '<div class="card"><h3>🎨 旅程配色</h3><div class="chips" id="sth"></div></div><div class="card"><h3>旅伴</h3>'+T.people.map(function(p){return '<label>名字</label><input class="spn" data-id="'+p.id+'" value="'+esc(p.name)+'">'}).join("")+'<label>新增旅伴</label><input id="spa" placeholder="輸入名字"><button class="btn" id="spv">儲存旅伴</button><div class="mu">為避免帳目錯亂,旅伴只能改名或新增,不能刪除。</div></div>'+
 '<div class="card"><h3>記帳分類(每行一個,可加 emoji)</h3><textarea id="scs" rows="6">'+esc(T.cats.join("\n"))+'</textarea><button class="btn" id="scv">儲存分類</button></div>'+
 '<div class="card"><h3>邀請旅伴</h3><p class="mu" style="margin:0">旅行代碼:<b>'+esc(CUR)+'</b></p>'+(cloud?'<button class="btn s" id="sin">複製邀請連結</button><div class="mu">把連結傳給旅伴,對方打開就會加入。知道代碼的人都能看和修改,請不要公開。</div>':'<div class="mu">需要先設定雲端同步才能邀請。</div>')+'</div>'+
-'<div class="card"><h3>☁️ 雲端同步</h3><p class="mu" style="margin:0">'+(cloud?"已啟用 Firebase 同步":"目前是本機模式")+'。貼上 Firebase 專案的 firebaseConfig(JSON 或 JavaScript 物件)後儲存。</p><textarea id="sfb" rows="5" placeholder=\'{"apiKey":"...","projectId":"..."}\'>'+esc(CFG?JSON.stringify(CFG,null,1):"")+'</textarea><button class="btn" id="sfv">儲存並重新載入</button>'+(CFG?'<button class="btn s" id="sfc">清除同步設定</button>':"")+'</div>'+
+'<div class="card"><h3>☁️ 雲端同步</h3><p class="mu" style="margin:0">'+(cloud?"已啟用 Firebase 同步":"目前是本機模式")+'。貼上 Firebase 專案的 firebaseConfig(JSON 或 JavaScript 物件)後儲存。</p><p class="mu" style="margin:6px 0">診斷:設定 '+(CFG&&CFG.projectId?"✔ 專案 "+esc(CFG.projectId):"✘ 尚未貼上")+(BUILTIN?"(內建)":"")+" ・ 同步元件 "+(sdk==="ok"?"✔ 已載入":(sdk==="fail"?"✘ 載入失敗":"—"))+" ・ 狀態:"+esc($("st").textContent)+(lastErr?" ・ 錯誤代碼:"+esc(lastErr):"")+'</p><textarea id="sfb" rows="5" placeholder=\'{"apiKey":"...","projectId":"..."}\'>'+esc(CFG?JSON.stringify(CFG,null,1):"")+'</textarea><button class="btn" id="sfv">儲存並重新載入</button>'+(CFG?'<button class="btn s" id="sfc">清除同步設定</button>':"")+'</div>'+
 '<div class="card"><h3>備份</h3><button class="btn s" id="sbx">複製這趟旅行資料</button><button class="btn s" id="sbi">匯入並覆蓋</button><textarea id="sbb" rows="3"></textarea><div class="mu" id="sbm"></div></div>'+
 '<div class="card"><button class="btn s" id="srm">從這支手機移除這趟旅行</button><div class="mu">雲端資料不會被刪除。</div></div>';
 swch($("sth"),tkey(),function(k){wr({theme:k});if(!cloud)drawSet()});$("ssv").onclick=function(){wr({name:$("sn").value.trim()||T.name,start:$("ss").value,end:$("se").value,cur:$("sc").value,rate:parseFloat($("sr").value)||T.rate});$("ssv").textContent="已儲存 ✓"};
@@ -225,7 +333,7 @@ $("wiList").addEventListener("click",function(e){var b=e.target.closest("button[
 if(a==="wsched"){wS={id:id,v:{d:days()[0],t:""}};wE=null;drawWish()}else if(a==="wedit"){wE={id:id};wS=null;drawWish()}else if(a==="wcancel"){wE=null;wS=null;drawWish()}
 else if(a==="wstar"){p["wish."+id+".s"]=!T.wish[id].s;wr(p)}
 else if(a==="wsave"){var nm=$("wen").value.trim();if(!nm){$("wen").focus();return}p["wish."+id+".name"]=nm;p["wish."+id+".m"]=$("wem").value.trim();p["wish."+id+".t"]=$("wet").value.trim();wE=null;wr(p);if(cloud)drawWish()}
-else if(a==="wgo"){var w=T.wish[id];if(!$("wsd").value)return;p["plan."+uid()]={d:$("wsd").value,t:$("wst").value.trim(),x:w.name,m:w.m||"",n:w.t||""};p["wish."+id]=DEL;wS=null;wr(p);if(cloud)drawWish()}
+else if(a==="wgo"){var w=T.wish[id];if(!$("wsd").value)return;p["plan."+uid()]={d:$("wsd").value,t:$("wst").value.trim()||fmt(nextSlot($("wsd").value)),u:60,k:false,x:w.name,m:w.m||"",n:w.t||""};p["wish."+id]=DEL;wS=null;wr(p);if(cloud)drawWish()}
 else if(a==="wdel")arm(b,"確定刪除?",function(){p["wish."+id]=DEL;wr(p)})});
 $("wiAdd").onclick=function(){var n=$("wiN").value.trim();if(!n){$("wiN").focus();return}var p={};p["wish."+uid()]={name:n.slice(0,60),m:$("wiM").value.trim(),t:$("wiT").value.trim(),c:WC[wcI],s:false};$("wiN").value="";$("wiM").value="";$("wiT").value="";wr(p)};
 /* 工具箱 */
@@ -271,11 +379,12 @@ drawTools();
 /* 啟動 */
 function ls(urls,cb){var i=0;(function n(){if(i>=urls.length){cb(false);return}var s=document.createElement("script");s.src=urls[i++];s.onload=function(){cb(true)};s.onerror=n;document.head.appendChild(s)})()}
 function boot(){var h=(location.hash||"").replace("#",""),hc=/^[a-z0-9]{8}$/i.test(h)?h.toLowerCase():null;
-function go(){if(hc&&cloud&&!TR.some(function(t){return t.code===hc})){join(hc);return}if(CUR&&TR.some(function(t){return t.code===CUR}))openTrip(CUR);else if(TR.length)openTrip(TR[0].code);else{CUR=null;render()}}
-function after(ok){if(ok&&window.firebase&&firebase.firestore){try{if(!firebase.apps.length)firebase.initializeApp(CFG);fdb=firebase.firestore();try{fdb.enablePersistence({synchronizeTabs:true}).catch(function(){})}catch(e){}cloud=true}catch(e){cloud=false}}else if(CFG)st("⚠️ 雲端同步載入失敗,目前使用本機模式");go()}
+function go(){if(hc&&cloud&&!TR.some(function(t){return t.code===hc})){join(hc);return}if(CUR&&TR.some(function(t){return t.code===CUR}))openTrip(CUR);else if(TR.length)openTrip(TR[0].code);else{CUR=null;render();st(cloud?"☁️ 雲端同步已啟用":(sdk==="fail"?"⚠️ 雲端同步載入失敗,目前使用本機模式":"📱 本機模式(尚未設定雲端同步)"))}}
+function after(ok){if(ok&&window.firebase&&firebase.firestore){try{if(!firebase.apps.length)firebase.initializeApp(CFG);fdb=firebase.firestore();try{fdb.enablePersistence({synchronizeTabs:true}).catch(function(){})}catch(e){}cloud=true;sdk="ok"}catch(e){cloud=false;sdk="fail";lastErr=String(e&&e.message||e)}}else if(CFG&&CFG.projectId){sdk="fail"}go()}
 if(!CFG||!CFG.projectId){after(false);return}
 if(window.firebase&&firebase.firestore){after(true);return}
-var V="10.12.2";ls(["https://cdnjs.cloudflare.com/ajax/libs/firebase/"+V+"/firebase-app-compat.min.js","https://cdn.jsdelivr.net/npm/firebase@"+V+"/firebase-app-compat.js"],function(a){if(!a){after(false);return}ls(["https://cdnjs.cloudflare.com/ajax/libs/firebase/"+V+"/firebase-firestore-compat.min.js","https://cdn.jsdelivr.net/npm/firebase@"+V+"/firebase-firestore-compat.js"],after)})}
+var V="10.12.2",C="https://cdnjs.cloudflare.com/ajax/libs/firebase/"+V+"/",J="https://cdn.jsdelivr.net/npm/firebase@"+V+"/";
+ls(["firebase-app-compat.js",C+"firebase-app-compat.min.js",J+"firebase-app-compat.js"],function(a){if(!a){after(false);return}ls(["firebase-firestore-compat.js",C+"firebase-firestore-compat.min.js",J+"firebase-firestore-compat.js"],after)})}
 show();boot();
 try{if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(function(){})}catch(e){}
 </script></body></html>
